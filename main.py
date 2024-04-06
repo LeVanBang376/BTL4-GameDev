@@ -1,6 +1,7 @@
 import pygame
 import random
 import copy
+from menu_screen import MenuScreen
 
 # Utility functions
 def directions(x, y, minX=0, minY=0, maxX=7, maxY=7):
@@ -46,7 +47,8 @@ class Othello:
 		pygame.init()
 		self.screen = pygame.display.set_mode((1100, 800))
 		pygame.display.set_caption("Othello")
-
+  
+		self.showMenu = True
 		self.time = 0
 
 		self.rows = 8
@@ -58,15 +60,23 @@ class Othello:
 		self.currentPlayer = 1
 
 		self.grid = Grid(self.rows, self.columns, (80, 80), self)
+		self.font = pygame.font.SysFont('Arial', 20, True, False)
 
 		self.computerPlayer = ComputerPlayer(self.grid)
 
 		self.gameOver = False
 
 		self.RUN = True
+		self.menuFont = pygame.font.SysFont('Arial', 42, True, False)
+		self.menuScreen = MenuScreen(self.screen, self.menuFont)
 
 	def run(self):
 		while self.RUN == True:
+			if self.showMenu:
+				drawMenuReturn = self.menuScreen.drawMenu()
+				if drawMenuReturn == "notShowMenu":
+					self.showMenu = False
+				continue
 			self.input()
 			self.update()
 			self.draw()
