@@ -137,7 +137,7 @@ class Othello:
                     return
                 if self.menuScreen.menuType =="easy":
                     cell, score = self.computerPlayer.computerHard(self.grid.gridLogic, 5, -64, 64, -1)
-                elif self.menuScreen.menuType =="hard":
+                else :
                     # cell, score = self.computerPlayer.computerHard(self.grid.gridLogic, 5, -64, 64, -1)
                     # print('Dumb Move: ', cell)
                     cell = self.AlphaZeroPlayer.play(np.array(self.grid.gridLogic), self.currentPlayer, 0)
