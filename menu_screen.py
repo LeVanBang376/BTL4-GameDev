@@ -148,7 +148,7 @@ class MenuScreen:
                 if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     mouse_pos = event.pos
                     if easy_button.collidepoint(mouse_pos):
-                        return "Ease"
+                        return "Easy"
                     if hard_button.collidepoint(mouse_pos):
                         return "Hard"
                     if back_button.collidepoint(mouse_pos):
@@ -238,17 +238,20 @@ class MenuScreen:
             drawDifficultReturn = self.drawDifficultMenu()
             if drawDifficultReturn == "Easy":
                 self.menuType = "easy"
+                self.difficulty = "easy"
             if drawDifficultReturn == "Hard":
                 self.menuType = "hard"
+                self.difficulty = "hard"
+                
             if drawDifficultReturn == "ChooseEnemy":
                 self.menuType = "chooseEnemy"
                 return "showMenu"
             return "notShowMenu"
         if self.menuType == "chooseRoom":
-            drawRoomReturn = self.drawRoomMenu()
-            # if drawDifficultReturn == "Easy":
-            #     self.menuType = "chooseDifficult"
-            if drawRoomReturn == "ChooseEnemy":
-                self.menuType = "chooseEnemy"
-                return "showMenu"
+            # drawRoomReturn = self.drawRoomMenu()
+            # # if drawDifficultReturn == "Easy":
+            # #     self.menuType = "chooseDifficult"
+            # if drawRoomReturn == "ChooseEnemy":
+            #     self.menuType = "chooseEnemy"
+            #     return "showMenu"
             return "notShowMenu"

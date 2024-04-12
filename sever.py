@@ -303,6 +303,7 @@ class Server:
         self.whiteCount = 0,
         self.blackCount = 0,
         self.win = 0
+        self.move = [-1,-1]
 
 
     def clientConn(self, conn, addr):
@@ -316,20 +317,25 @@ class Server:
                 recvData = conn.recv(2048).decode()
                 if not recvData:
                     print("Client", addr, ": Disconnected")
+                    sendData = str(self.makeData(404, self.grid.gridLogic, self.move))
+                    reply = str.encode(sendData)
                 else:
                     
                     self.getData(recvData)
-                    self.win = self.checkWin()
-                    sendData = str(self.makeData(self.playerTurn, self.grid.gridLogic, (self.win)))
+                    # self.win = self.checkWin() 
+                    sendData = str(self.makeData(self.playerTurn, self.grid.gridLogic, self.move))
                     reply = str.encode(sendData)
 
                 conn.sendall(reply)
 
             except:
                 print("Lost Connection")
+                self.reset_game()
                 break
         
         self.playercount -= 1
+        self.reset_game()
+        
 
 
     def getData(self, data):
@@ -340,6 +346,8 @@ class Server:
             else:
                 playerNB = tmp[1]
                 pos = tmp[0]
+                clicked_y, clicked_x = pos[0], pos[1]
+                self.move = [clicked_y, clicked_x]
                 if self.grid.gridLogic[pos[0]][pos[1]] == 0:
                     availMoves = self.grid.findAvailMoves(self.grid.gridLogic, playerNB)
                     print('availbleMove: ', availMoves)
@@ -365,66 +373,75 @@ class Server:
                     self.playerTurn *= -1
 
 
-    def makeData(self, playerTurn, grid, win):
-        data = [playerTurn, grid, win]
+    def makeData(self, playerTurn, grid, move):
+        data = [playerTurn, grid, move]
         return data
+    
+    def reset_game(self):
+        self.playercount = 0
+        self.grid = Grid()
+        self.playerTurn = 1
+        self.whiteCount = 0,
+        self.blackCount = 0,
+        self.win = 0
+        self.move = [-1,-1]
         
 
-    def checkWinOld(self):
-        for player in range(1, 3):
-            #check rows
-            p = str(player)
-            for r in range(3):
-                win = p
-                for c in range(3):
-                    if self.grid[r][c] != p:
-                        win = ''
-                if win:
-                    return win
-            #check columns
-            for c in range(3):
-                win = p
-                for r in range(3):
-                    if self.grid[r][c] != p:
-                        win = ''
-                if win:
-                    return win
+    # def checkWinOld(self):
+    #     for player in range(1, 3):
+    #         #check rows
+    #         p = str(player)
+    #         for r in range(3):
+    #             win = p
+    #             for c in range(3):
+    #                 if self.grid[r][c] != p:
+    #                     win = ''
+    #             if win:
+    #                 return win
+    #         #check columns
+    #         for c in range(3):
+    #             win = p
+    #             for r in range(3):
+    #                 if self.grid[r][c] != p:
+    #                     win = ''
+    #             if win:
+    #                 return win
             
-            #check diagonals
-            win = p
-            for i in range(3):
-                if self.grid[i][i] != p:
-                    win = ''
-            if win:
-                return win
+    #         #check diagonals
+    #         win = p
+    #         for i in range(3):
+    #             if self.grid[i][i] != p:
+    #                 win = ''
+    #         if win:
+    #             return win
             
-            win = p
-            for i in range(3):
-                if self.grid[i][2-i] != p:
-                    win = ''
-            if win:
-                return win
+    #         win = p
+    #         for i in range(3):
+    #             if self.grid[i][2-i] != p:
+    #                 win = ''
+    #         if win:
+    #             return win
 
-        win = 't'
-        for c in range(3):
-            for r in range(3):
-                if self.grid[c][r] == '':
-                    win = ''
-        if win:
-            return win
+    #     win = 't'
+    #     for c in range(3):
+    #         for r in range(3):
+    #             if self.grid[c][r] == '':
+    #                 win = ''
+    #     if win:
+    #         return win
 
-        return ''
+    #     return ''
 
-    def checkWin(self):
-        if len(self.grid.findAvailMoves(self.grid.gridLogic, self.playerTurn)) == 0:
-            self.blackCount, self.whiteCount = self.countBlackWhite()
-            if self.blackCount < self.whiteCount:
-              return 1
-            elif self.whiteCount > self.blackCount:
-                return -1
-            else:
-                return 2
-        return 0
+    # def checkWin(self):
+    #     if len(self.grid.findAvailMoves(self.grid.gridLogic, self.playerTurn)) == 0:
+    #         self.blackCount, self.whiteCount = self.countBlackWhite()
+    #         if self.blackCount < self.whiteCount:
+    #           return 1
+    #         elif self.whiteCount > self.blackCount:
+    #             return -1
+    #         else:
+    #             return 2
+    #     return 0
         
     
     def countBlackWhite(self):

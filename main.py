@@ -3,6 +3,8 @@ import random
 import copy
 from menu_screen import MenuScreen
 import numpy as np
+import socket
+import time
 
 
 import sys
@@ -52,6 +54,41 @@ def evaluateBoard(grid, player):
             score -= col
     return score
 
+class Network:
+
+    def __init__(self):
+
+        self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+        # self.server = str(input('Server Address : '))
+        # if self.server == '':
+        self.server = "127.0.0.1:8080"
+        self.ip = str(self.server.split(":")[0])
+        self.port = int(self.server.split(":")[1])
+        print(self.ip, "/", self.port)
+        self.addr = (self.ip, self.port)
+
+        self.player = self.connect()
+
+
+    def connect(self):
+        try:
+            self.client.connect(self.addr)
+            print("Connected !")
+            return self.client.recv(2048).decode()
+        except:
+            pass
+
+
+    def send(self, data):
+        try:
+            self.client.send(str.encode(data))
+            temp =  self.client.recv(2048).decode()
+            return temp
+        except socket.error as e:
+            print(e)
+            
+
 class Othello:
     def __init__(self):
         pygame.init()
@@ -67,7 +104,9 @@ class Othello:
         self.player1 = 1
         self.player2 = -1
 
+        self.currentPlayerTurn = 1
         self.currentPlayer = 1
+        
 
         self.grid = Grid(self.rows, self.columns, (80, 80), self)
         self.font = pygame.font.SysFont('Arial', 20, True, False)
@@ -80,6 +119,13 @@ class Othello:
         self.RUN = True
         self.menuFont = pygame.font.SysFont('Arial', 42, True, False)
         self.menuScreen = MenuScreen(self.screen, self.menuFont)
+        
+        self.is_pvp = False
+        self.network = None
+        self.clicked_x = -1
+        self.clicked_y = -1
+        self.disconnected = False
+        
 
     def run(self):
         while self.RUN == True:
@@ -91,6 +137,15 @@ class Othello:
 
             if self.menuScreen.menuType =="hard" and self.AlphaZeroPlayer == None:
                 self.AlphaZeroPlayer = AlphaZeroPlayer()
+            
+            if self.menuScreen.menuType == "chooseRoom" and self.is_pvp == False:
+                self.is_pvp = True
+                self.network = Network()
+                if int(self.network.player) == 1:
+                    self.currentPlayer = 1
+                elif int(self.network.player) == 2:
+                    self.currentPlayer = -1
+                
 
             self.input()
             self.update()
@@ -106,21 +161,24 @@ class Othello:
                     self.grid.printGameLogicBoard()
 
                 if event.button == 1:	# Left click
-                    if self.currentPlayer == 1 and not self.gameOver:
+                    if self.currentPlayerTurn == self.currentPlayer and not self.gameOver:
                         x, y = pygame.mouse.get_pos()
                         x, y = (x - 80) // 80, (y - 80) // 80
-                        validCells = self.grid.findAvailMoves(self.grid.gridLogic, self.currentPlayer)
+                        validCells = self.grid.findAvailMoves(self.grid.gridLogic, self.currentPlayerTurn)
                         if not validCells:
                             pass
                         else:
                             if (y, x) in validCells:
-                                self.grid.insertToken(self.grid.gridLogic, self.currentPlayer, y, x)
-                                swappableTiles = self.grid.swappableTiles(y, x, self.grid.gridLogic, self.currentPlayer)
+                                self.grid.insertToken(self.grid.gridLogic, self.currentPlayerTurn, y, x)
+                                swappableTiles = self.grid.swappableTiles(y, x, self.grid.gridLogic, self.currentPlayerTurn)
                                 for tile in swappableTiles:
-                                    self.grid.animateTransitions(tile, self.currentPlayer)
+                                    self.grid.animateTransitions(tile, self.currentPlayerTurn)
                                     self.grid.gridLogic[tile[0]][tile[1]] *= -1
-                                self.currentPlayer *= -1
+                                self.currentPlayerTurn *= -1
                                 self.time = pygame.time.get_ticks()
+                                
+                                self.clicked_y = y
+                                self.clicked_x = x
 
                     if self.gameOver:
                         x, y = pygame.mouse.get_pos()
@@ -129,32 +187,71 @@ class Othello:
                             self.gameOver = False
 
     def update(self):
-        if self.currentPlayer == -1:
-            new_time = pygame.time.get_ticks()
-            if new_time - self.time >= 100:	# Delay 1s
-                if not self.grid.findAvailMoves(self.grid.gridLogic, self.currentPlayer):
+        if self.currentPlayerTurn == -1*self.currentPlayer:
+            if self.is_pvp: # new code PvP
+                playerTurn , grid, move = self.getData(self.network.send(self.makeData()))
+                # print( playerTurn , move)
+                if playerTurn == 404:
                     self.gameOver = True
+                    self.disconnected = True
                     return
-                if self.menuScreen.menuType =="easy":
-                    cell, score = self.computerPlayer.computerHard(self.grid.gridLogic, 5, -64, 64, -1)
-                else :
-                    # cell, score = self.computerPlayer.computerHard(self.grid.gridLogic, 5, -64, 64, -1)
-                    # print('Dumb Move: ', cell)
-                    cell = self.AlphaZeroPlayer.play(np.array(self.grid.gridLogic), self.currentPlayer, 0)
-                    # print('AlphaZero Move: ', move)
+                
+                if move != [-1,-1] and -1*playerTurn != self.currentPlayer :
+                    # print( playerTurn , move)
                     
-                self.grid.insertToken(self.grid.gridLogic, self.currentPlayer, cell[0], cell[1])
-                swappableTiles = self.grid.swappableTiles(cell[0], cell[1], self.grid.gridLogic, self.currentPlayer)
-                for tile in swappableTiles:
-                    self.grid.animateTransitions(tile, self.currentPlayer)
-                    self.grid.gridLogic[tile[0]][tile[1]] *= -1
-                self.currentPlayer *= -1
+                    print('----------------')
+                    print(self.currentPlayerTurn)
+                    print(move)
+                    self.grid.insertToken(self.grid.gridLogic, self.currentPlayerTurn, move[0], move[1])
+                    swappableTiles = self.grid.swappableTiles(move[0], move[1], self.grid.gridLogic, self.currentPlayerTurn)
+                    for tile in swappableTiles:
+                        self.grid.animateTransitions(tile, self.currentPlayerTurn)
+                        self.grid.gridLogic[tile[0]][tile[1]] *= -1
+                    self.currentPlayerTurn *= -1
+            
+            else:
+               # PvE old code     
+                new_time = pygame.time.get_ticks()
+                #cell = None
+                if new_time - self.time >= 100:	# Delay 1s
+                    if not self.grid.findAvailMoves(self.grid.gridLogic, self.currentPlayerTurn):
+                        self.gameOver = True
+                        return
+                    if self.menuScreen.difficulty =="easy":
+                        cell, score = self.computerPlayer.computerHard(self.grid.gridLogic, 5, -64, 64, self.currentPlayerTurn)
+                    elif self.menuScreen.difficulty =="hard" :
+                        # cell, score = self.computerPlayer.computerHard(self.grid.gridLogic, 5, -64, 64, -1)
+                        # print('Dumb Move: ', cell)
+                        cell = self.AlphaZeroPlayer.play(np.array(self.grid.gridLogic), self.currentPlayerTurn, 0)
+                        # print('AlphaZero Move: ', move)
+
+                    self.grid.insertToken(self.grid.gridLogic, self.currentPlayerTurn, cell[0], cell[1])
+                    swappableTiles = self.grid.swappableTiles(cell[0], cell[1], self.grid.gridLogic, self.currentPlayerTurn)
+                    for tile in swappableTiles:
+                        self.grid.animateTransitions(tile, self.currentPlayerTurn)
+                        self.grid.gridLogic[tile[0]][tile[1]] *= -1
+                    self.currentPlayerTurn *= -1
 
         self.grid.player1Score = self.grid.calculatePlayerScore(self.player1)
         self.grid.player2Score = self.grid.calculatePlayerScore(self.player2)
-        if not self.grid.findAvailMoves(self.grid.gridLogic, self.currentPlayer):
+        if not self.grid.findAvailMoves(self.grid.gridLogic, self.currentPlayerTurn):
             self.gameOver = True
             return
+    
+    def getData(self, data):
+        tmp = eval(data)
+        playerTurn = tmp[0]
+        grid = tmp[1]
+        move = tmp[2]
+        return playerTurn , grid, move
+
+
+    def makeData(self):
+        clicked = [self.clicked_y, self.clicked_x]
+        data = str([clicked, self.currentPlayer])
+        if (clicked != [-1, -1]):
+            print("Sent: ", data)
+        return data
 
     def draw(self):
         self.screen.fill((0, 0, 0))
@@ -309,16 +406,16 @@ class Grid:
 
         return swappableTiles
 
-    def findAvailMoves(self, grid, currentPlayer):
+    def findAvailMoves(self, grid, currentPlayerTurn):
         """Takes the list of validCells and checks each to see if playable"""
-        validCells = self.findValidCells(grid, currentPlayer)
+        validCells = self.findValidCells(grid, currentPlayerTurn)
         playableCells = []
 
         for cell in validCells:
             x, y = cell
             if cell in playableCells:
                 continue
-            swapTiles = self.swappableTiles(x, y, grid, currentPlayer)
+            swapTiles = self.swappableTiles(x, y, grid, currentPlayerTurn)
 
             # Nếu nước đi đó có thể lật đc quân đối phương
             if len(swapTiles) > 0:
@@ -353,7 +450,17 @@ class Grid:
     def endScreen(self):
         if self.GAME.gameOver:
             endScreenImg = pygame.Surface((320, 320))
-            endText = self.font.render(f'{"Congratulations, You Won!!" if self.player1Score > self.player2Score else "Bad Luck, You Lost"}', 1, 'White')
+            if (self.player1Score > self.player2Score) and  (self.GAME.currentPlayer == 1):
+                txt = "Congratulations, You Won!!"
+            elif (self.player1Score < self.player2Score) and  (self.GAME.currentPlayer == -1):
+                txt = "Congratulations, You Won!!"
+            else:
+                txt = "Bad Luck, You Lost"
+            
+            if self.GAME.disconnected == True:
+                txt = "Opponent disconnected. You Won!!"
+                
+            endText = self.font.render(txt, 1, 'White')
             endScreenImg.blit(endText, (0, 0))
             newGame = pygame.draw.rect(endScreenImg, 'White', (80, 160, 160, 80))
             newGameText = self.font.render('Play Again', 1, 'Black')
@@ -370,8 +477,8 @@ class Grid:
             token.draw(window)
 
         # Vẽ những bước đi khả thi trên bàn cờ
-        availMoves = self.findAvailMoves(self.gridLogic, self.GAME.currentPlayer)
-        if self.GAME.currentPlayer == 1:
+        availMoves = self.findAvailMoves(self.gridLogic, self.GAME.currentPlayerTurn)
+        if self.GAME.currentPlayerTurn == self.GAME.currentPlayer:
             for move in availMoves:
                 pygame.draw.rect(window, 'White', (80 + (move[1] * 80) + 30, 80 + (move[0] * 80) + 30, 20, 20))
 
