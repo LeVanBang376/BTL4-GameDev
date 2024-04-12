@@ -322,6 +322,7 @@ class Server:
                 else:
                     
                     self.getData(recvData)
+                    print('Cur move:' , self.move)
                     # self.win = self.checkWin() 
                     sendData = str(self.makeData(self.playerTurn, self.grid.gridLogic, self.move))
                     reply = str.encode(sendData)
@@ -347,7 +348,6 @@ class Server:
                 playerNB = tmp[1]
                 pos = tmp[0]
                 clicked_y, clicked_x = pos[0], pos[1]
-                self.move = [clicked_y, clicked_x]
                 if self.grid.gridLogic[pos[0]][pos[1]] == 0:
                     availMoves = self.grid.findAvailMoves(self.grid.gridLogic, playerNB)
                     print('availbleMove: ', availMoves)
@@ -371,6 +371,7 @@ class Server:
                         print(self.grid.gridLogic[6])
                         print(self.grid.gridLogic[7])
                     self.playerTurn *= -1
+                    self.move = [clicked_y, clicked_x]
 
 
     def makeData(self, playerTurn, grid, move):
@@ -469,6 +470,7 @@ class Server:
 
             #start async connection for client
             start_new_thread(self.clientConn, (conn, addr))
+            
 
 
 server = Server()

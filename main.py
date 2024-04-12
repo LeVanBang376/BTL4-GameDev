@@ -190,6 +190,7 @@ class Othello:
         if self.currentPlayerTurn == -1*self.currentPlayer:
             if self.is_pvp: # new code PvP
                 playerTurn , grid, move = self.getData(self.network.send(self.makeData()))
+                # print('----------------')
                 # print( playerTurn , move)
                 if playerTurn == 404:
                     self.gameOver = True
