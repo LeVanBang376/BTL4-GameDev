@@ -13,30 +13,30 @@ class MenuScreen:
         
     def drawEnemyMenu(self):
         self.window.blit(self.background, (0, 0))
-        self.window.blit(self.logo, (390, 70))
+        self.window.blit(self.logo, (285, 70))
         
-        vs_computuer_button = pygame.Rect((270, 360, 560, 80))  
+        vs_computuer_button = pygame.Rect((170, 280, 480, 80))  
         pygame.draw.rect(self.window, (159,191,223), vs_computuer_button)
         vs_computuer_text = self.font.render("Vs computer", True, (0, 0, 0))
-        vs_computuer_text_center = vs_computuer_text.get_rect(center=(550, 400))
+        vs_computuer_text_center = vs_computuer_text.get_rect(center=(410, 320))
         self.window.blit(vs_computuer_text, vs_computuer_text_center) 
         
-        vs_player_button = pygame.Rect((270, 480, 560, 80))  
+        vs_player_button = pygame.Rect((170, 400, 480, 80))  
         pygame.draw.rect(self.window, (159,191,223), vs_player_button)
         vs_player_text = self.font.render("Vs player", True, (0, 0, 0))
-        vs_player_text_center = vs_player_text.get_rect(center=(550, 520))
+        vs_player_text_center = vs_player_text.get_rect(center=(410, 440))
         self.window.blit(vs_player_text, vs_player_text_center) 
         
-        # setting_button = pygame.Rect((270, 600, 560, 80))  
+        # setting_button = pygame.Rect((170, 600, 480, 80))  
         # pygame.draw.rect(self.window, (255, 255, 255), setting_button)
         # setting_text = self.font.render("Setting", True, (0, 0, 0))
-        # setting_text_center = setting_text.get_rect(center=(550, 515))
+        # setting_text_center = setting_text.get_rect(center=(410, 515))
         # self.window.blit(setting_text, setting_text_center) 
         
-        exit_button = pygame.Rect((270, 600, 560, 80))  
+        exit_button = pygame.Rect((170, 520, 480, 80))  
         pygame.draw.rect(self.window, (159,191,223), exit_button)
         exit_text = self.font.render("Exit", True, (0, 0, 0))
-        exit_text_center = exit_text.get_rect(center=(550, 640))
+        exit_text_center = exit_text.get_rect(center=(410, 560))
         self.window.blit(exit_text, exit_text_center) 
 
         pygame.display.flip()
@@ -47,23 +47,23 @@ class MenuScreen:
             # draw border of buttons
             mousePos = pygame.mouse.get_pos()
             if vs_computuer_button.collidepoint(mousePos):
-                vs_computuer_btn_border = pygame.Rect((270, 360, 560, 80))  
+                vs_computuer_btn_border = pygame.Rect((170, 280, 480, 80))  
                 pygame.draw.rect(self.window, (0, 0, 0), vs_computuer_btn_border, 3)
             elif vs_player_button.collidepoint(mousePos):
-                vs_player_button = pygame.Rect((270, 480, 560, 80))  
+                vs_player_button = pygame.Rect((170, 400, 480, 80))  
                 pygame.draw.rect(self.window, (0, 0, 0), vs_player_button, 3)
             elif exit_button.collidepoint(mousePos):
-                exit_btn_border = pygame.Rect((270, 600, 560, 80))  
+                exit_btn_border = pygame.Rect((170, 520, 480, 80))  
                 pygame.draw.rect(self.window, (0, 0, 0), exit_btn_border, 3) 
             else:
                 # remove border of buttons by changing border color to (159,191,223)
-                vs_computuer_btn_border = pygame.Rect((270, 360, 560, 80))  
+                vs_computuer_btn_border = pygame.Rect((170, 280, 480, 80))  
                 pygame.draw.rect(self.window, (159,191,223), vs_computuer_btn_border, 3)
                 
-                vs_player_button = pygame.Rect((270, 480, 560, 80))  
+                vs_player_button = pygame.Rect((170, 400, 480, 80))  
                 pygame.draw.rect(self.window, (159,191,223), vs_player_button, 3)
                 
-                exit_btn_border = pygame.Rect((270, 600, 560, 80))  
+                exit_btn_border = pygame.Rect((170, 520, 480, 80))  
                 pygame.draw.rect(self.window, (159,191,223), exit_btn_border, 3)
             pygame.display.flip()
             
@@ -89,24 +89,24 @@ class MenuScreen:
     def drawDifficultMenu(self):
     # Display the final score
         self.window.blit(self.background, (0, 0))
-        self.window.blit(self.logo, (390, 70))
+        self.window.blit(self.logo, (285, 70))
         
-        easy_button = pygame.Rect((270, 360, 560, 80))  
+        easy_button = pygame.Rect((170, 280, 480, 80))  
         pygame.draw.rect(self.window, (159,191,223), easy_button)
         easy_text = self.font.render("Easy", True, (0, 0, 0))
-        easy_text_center = easy_text.get_rect(center=(550, 400))
+        easy_text_center = easy_text.get_rect(center=(410, 320))
         self.window.blit(easy_text, easy_text_center) 
         
-        hard_button = pygame.Rect((270, 480, 560, 80))  
+        hard_button = pygame.Rect((170, 400, 480, 80))  
         pygame.draw.rect(self.window, (159,191,223), hard_button)
         hard_text = self.font.render("Hard", True, (0, 0, 0))
-        hard_text_center = hard_text.get_rect(center=(550, 520))
+        hard_text_center = hard_text.get_rect(center=(410, 440))
         self.window.blit(hard_text, hard_text_center) 
         
-        back_button = pygame.Rect((270, 600, 560, 80))  
+        back_button = pygame.Rect((170, 520, 480, 80))  
         pygame.draw.rect(self.window, (159,191,223), back_button)
         back_text = self.font.render("Back to menu", True, (0, 0, 0))
-        back_text_center = back_text.get_rect(center=(550, 640))
+        back_text_center = back_text.get_rect(center=(410, 560))
         self.window.blit(back_text, back_text_center) 
         
 
@@ -118,23 +118,23 @@ class MenuScreen:
             # draw border of buttons
             mousePos = pygame.mouse.get_pos()
             if easy_button.collidepoint(mousePos):
-                easy_btn_border = pygame.Rect((270, 360, 560, 80))  
+                easy_btn_border = pygame.Rect((170, 280, 480, 80))  
                 pygame.draw.rect(self.window, (0, 0, 0), easy_btn_border, 3)
             elif hard_button.collidepoint(mousePos):
-                hard_btn_button = pygame.Rect((270, 480, 560, 80))  
+                hard_btn_button = pygame.Rect((170, 400, 480, 80))  
                 pygame.draw.rect(self.window, (0, 0, 0), hard_btn_button, 3)
             elif back_button.collidepoint(mousePos):
-                back_button_border = pygame.Rect((270, 600, 560, 80))  
+                back_button_border = pygame.Rect((170, 520, 480, 80))  
                 pygame.draw.rect(self.window, (0, 0, 0), back_button_border, 3) 
             else:
                 # remove border of buttons by changing border color to (159,191,223)
-                easy_btn_border = pygame.Rect((270, 360, 560, 80))  
+                easy_btn_border = pygame.Rect((170, 280, 480, 80))  
                 pygame.draw.rect(self.window, (159,191,223), easy_btn_border, 3)
                 
-                hard_btn_button = pygame.Rect((270, 480, 560, 80))  
+                hard_btn_button = pygame.Rect((170, 400, 480, 80))  
                 pygame.draw.rect(self.window, (159,191,223), hard_btn_button, 3)
                 
-                back_button_border = pygame.Rect((270, 600, 560, 80))  
+                back_button_border = pygame.Rect((170, 520, 480, 80))  
                 pygame.draw.rect(self.window, (159,191,223), back_button_border, 3)
             pygame.display.flip()
             
@@ -156,10 +156,10 @@ class MenuScreen:
         return False
 
     def drawRoom(self, roomId, x, y):
-        room_button = pygame.Rect((x, y, 560, 80))  
+        room_button = pygame.Rect((x, y, 480, 80))  
         pygame.draw.rect(self.window, (159,191,223), room_button)
         room_text = self.font.render(f"Room {roomId}", True, (0, 0, 0))
-        room_text_center = room_text.get_rect(center=(550, y + 40))
+        room_text_center = room_text.get_rect(center=(410, y + 40))
         self.window.blit(room_text, room_text_center) 
         
         pygame.display.flip()
@@ -170,20 +170,20 @@ class MenuScreen:
     # Display the final score
         self.window.blit(self.background, (0, 0))
         
-        rooms_container = pygame.Rect((270, 50, 560, 500))  
+        rooms_container = pygame.Rect((170, 50, 480, 500))  
         pygame.draw.rect(self.window, (255,255,255), rooms_container)
         
         if (len(self.roomButtons) == len(self.rooms)):
             self.roomButtons = []
         startY = 50
         for i in range(0, len(self.rooms)):
-            self.roomButtons.append(self.drawRoom(self.rooms[i].roomId, 270, startY + i*90)) 
+            self.roomButtons.append(self.drawRoom(self.rooms[i].roomId, 170, startY + i*90)) 
             
         
-        back_button = pygame.Rect((270, 600, 560, 80))  
+        back_button = pygame.Rect((170, 600, 480, 80))  
         pygame.draw.rect(self.window, (159,191,223), back_button)
         back_text = self.font.render("Back to menu", True, (0, 0, 0))
-        back_text_center = back_text.get_rect(center=(550, 640))
+        back_text_center = back_text.get_rect(center=(410, 640))
         self.window.blit(back_text, back_text_center) 
         
 
@@ -197,19 +197,19 @@ class MenuScreen:
             startY = 50
             for i in range(0, len(self.roomButtons)):
                 if self.roomButtons[i].collidepoint(mousePos):
-                    room_btn_border = pygame.Rect((270, startY + i*90, 560, 80))  
+                    room_btn_border = pygame.Rect((170, startY + i*90, 480, 80))  
                     pygame.draw.rect(self.window, (0, 0, 0), room_btn_border, 3)
                 else:
                     # remove border of buttons by changing border color to (159,191,223)
-                    room_btn_border = pygame.Rect((270, startY + i*90, 560, 80))  
+                    room_btn_border = pygame.Rect((170, startY + i*90, 480, 80))  
                     pygame.draw.rect(self.window, (159,191,223), room_btn_border, 3)
                     
             if back_button.collidepoint(mousePos):
-                back_button_border = pygame.Rect((270, 600, 560, 80))  
+                back_button_border = pygame.Rect((170, 600, 480, 80))  
                 pygame.draw.rect(self.window, (0, 0, 0), back_button_border, 3) 
             else:
                 # remove border of buttons by changing border color to (159,191,223)         
-                back_button_border = pygame.Rect((270, 600, 560, 80))  
+                back_button_border = pygame.Rect((170, 600, 480, 80))  
                 pygame.draw.rect(self.window, (159,191,223), back_button_border, 3)
                 
             pygame.display.flip()
