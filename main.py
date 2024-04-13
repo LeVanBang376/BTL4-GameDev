@@ -92,7 +92,8 @@ class Network:
 class Othello:
     def __init__(self):
         pygame.init()
-        self.screen = pygame.display.set_mode((1100, 800))
+        # self.screen = pygame.display.set_mode((1100, 800))
+        self.screen = pygame.display.set_mode((820, 640))
         pygame.display.set_caption("Othello")
   
         self.showMenu = True
@@ -108,7 +109,8 @@ class Othello:
         self.currentPlayer = 1
         
 
-        self.grid = Grid(self.rows, self.columns, (80, 80), self)
+        # self.grid = Grid(self.rows, self.columns, (80, 80), self)
+        self.grid = Grid(self.rows, self.columns, (64, 64), self, )
         self.font = pygame.font.SysFont('Arial', 20, True, False)
 
         self.computerPlayer = ComputerPlayer(self.grid)
@@ -163,7 +165,8 @@ class Othello:
                 if event.button == 1:	# Left click
                     if self.currentPlayerTurn == self.currentPlayer and not self.gameOver:
                         x, y = pygame.mouse.get_pos()
-                        x, y = (x - 80) // 80, (y - 80) // 80
+                        # x, y = (x - 80) // 80, (y - 80) // 80
+                        x, y = (x - 64) // 64, (y - 64) // 64
                         validCells = self.grid.findAvailMoves(self.grid.gridLogic, self.currentPlayerTurn)
                         if not validCells:
                             pass
@@ -470,9 +473,16 @@ class Grid:
 
     def drawGrid(self, window):
         window.blit(self.gridBg, (0, 0))
-
-        window.blit(self.drawScore('White', self.player1Score), (900, 100))
-        window.blit(self.drawScore('Black', self.player2Score), (900, 200))
+        
+        if not self.GAME.is_pvp:
+            window.blit(self.drawScore('You are', 'WHITE'), (660, 150))
+        else:
+            if self.GAME.currentPlayer == 1:
+                window.blit(self.drawScore('You are', 'WHITE'), (660, 150))
+            else: window.blit(self.drawScore('You are', 'BLACK'), (660, 150))
+            
+        window.blit(self.drawScore('White', self.player1Score), (660, 190))
+        window.blit(self.drawScore('Black', self.player2Score), (660, 230))
 
         for token in self.tokens.values():
             token.draw(window)
@@ -481,7 +491,8 @@ class Grid:
         availMoves = self.findAvailMoves(self.gridLogic, self.GAME.currentPlayerTurn)
         if self.GAME.currentPlayerTurn == self.GAME.currentPlayer:
             for move in availMoves:
-                pygame.draw.rect(window, 'White', (80 + (move[1] * 80) + 30, 80 + (move[0] * 80) + 30, 20, 20))
+                # pygame.draw.rect(window, 'White', (80 + (move[1] * 80) + 30, 80 + (move[0] * 80) + 30, 20, 20))
+                pygame.draw.rect(window, 'White', (64 + (move[1] * 64) + 24, 64 + (move[0] * 64) + 24, 16, 16))
 
         if self.GAME.gameOver:
             window.blit(self.endScreen(), (240, 240))
@@ -494,8 +505,10 @@ class Token:
         self.gridX = gridX
         self.gridY = gridY
         # Tọa độ pixel trên màn hình
-        self.posX = 80 + (gridY * 80)
-        self.posY = 80 + (gridX * 80)
+        # self.posX = 80 + (gridY * 80)
+        # self.posY = 80 + (gridX * 80)
+        self.posX = 64 + (gridY * 64)
+        self.posY = 64 + (gridX * 64)
 
         self.GAME = main
 
