@@ -1,8 +1,11 @@
 import pygame
 from room import Room
+import sys
+sys.path.append('othelloAI')
+from othelloAI.OthelloPlayer import AlphaZeroPlayer
 
 class MenuScreen:
-    def __init__(self, window, font, rooms = [Room(1201, 1), Room(1202, 1) , Room(1203, 2)]):
+    def __init__(self, window, font, othelloObject = None, rooms = [Room(1201, 1), Room(1202, 1) , Room(1203, 2)]):
         self.window = window
         self.font = font
         self.background = pygame.image.load("assets/ReversiImage.jpg")
@@ -10,6 +13,17 @@ class MenuScreen:
         self.menuType = "chooseEnemy"
         self.rooms = rooms
         self.roomButtons = []
+        self.othelloObject = othelloObject
+        
+    def convertGridStringToArray(self, gridStr): 
+        string = gridStr
+        string = string.replace('[', '')
+        string = string.replace(']', '')
+        string = string.replace(' ', '')
+        substrings = string.split(',')
+        array = [[int(substrings[i]) for i in range(j, j + 8)] for j in range(0, len(substrings), 8)]
+        return array
+        
         
     def drawEnemyMenu(self):
         self.window.blit(self.background, (0, 0))
@@ -76,7 +90,6 @@ class MenuScreen:
                     exit()
                 if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     mouse_pos = event.pos
-                    print(mouse_pos)
                     if vs_computuer_button.collidepoint(mouse_pos):
                         return "Vs computer"
                     if vs_player_button.collidepoint(mouse_pos):
@@ -89,7 +102,13 @@ class MenuScreen:
     def drawDifficultMenu(self):
     # Display the final score
         self.window.blit(self.background, (0, 0))
-        self.window.blit(self.logo, (285, 70))
+        # self.window.blit(self.logo, (285, 70))
+        
+        continue_button = pygame.Rect((170, 160, 480, 80))  
+        pygame.draw.rect(self.window, (159,191,223), continue_button)
+        continue_text = self.font.render("Continue", True, (0, 0, 0))
+        continue_text_center = continue_text.get_rect(center=(410, 200))
+        self.window.blit(continue_text, continue_text_center)
         
         easy_button = pygame.Rect((170, 280, 480, 80))  
         pygame.draw.rect(self.window, (159,191,223), easy_button)
@@ -126,6 +145,9 @@ class MenuScreen:
             elif back_button.collidepoint(mousePos):
                 back_button_border = pygame.Rect((170, 520, 480, 80))  
                 pygame.draw.rect(self.window, (0, 0, 0), back_button_border, 3) 
+            elif continue_button.collidepoint(mousePos):
+                continue_button_border = pygame.Rect((170, 160, 480, 80))  
+                pygame.draw.rect(self.window, (0, 0, 0), continue_button_border, 3) 
             else:
                 # remove border of buttons by changing border color to (159,191,223)
                 easy_btn_border = pygame.Rect((170, 280, 480, 80))  
@@ -136,6 +158,9 @@ class MenuScreen:
                 
                 back_button_border = pygame.Rect((170, 520, 480, 80))  
                 pygame.draw.rect(self.window, (159,191,223), back_button_border, 3)
+                
+                continue_button_border = pygame.Rect((170, 160, 480, 80))  
+                pygame.draw.rect(self.window, (159,191,223), continue_button_border, 3) 
             pygame.display.flip()
             
             # Get events
@@ -147,6 +172,21 @@ class MenuScreen:
                     exit()
                 if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     mouse_pos = event.pos
+                    if continue_button.collidepoint(mouse_pos):
+                        f = open("save_grid.txt", mode = 'r',encoding = 'utf-8')
+                        difficulty = f.readline()
+                        self.difficulty = difficulty
+                        if difficulty == "hard\n":
+                            self.othelloObject.AlphaZeroPlayer = AlphaZeroPlayer()
+                        grid = f.read()
+                        gridArray = self.convertGridStringToArray(grid)
+                        self.othelloObject.grid.gridLogic = gridArray
+                        print(len(gridArray))
+                        for i in range(len(gridArray)):
+                            for j in range(len(gridArray[i])):     
+                                if gridArray[i][j] != 0:                          
+                                    self.othelloObject.grid.insertTokenForContinue(self.othelloObject.grid.gridLogic, gridArray[i][j], i, j)
+                        return "Continue"
                     if easy_button.collidepoint(mouse_pos):
                         return "Easy"
                     if hard_button.collidepoint(mouse_pos):
@@ -239,6 +279,10 @@ class MenuScreen:
             if drawDifficultReturn == "Easy":
                 self.menuType = "easy"
                 self.difficulty = "easy"
+                self.othelloObject.file = open("save_grid.txt", mode = 'w+',encoding = 'utf-8')
+                self.othelloObject.file.write(f'easy\n')
+                self.othelloObject.file.write(str(self.othelloObject.grid.gridLogic))
+                self.othelloObject.file.close()
             if drawDifficultReturn == "Hard":
                 self.menuType = "hard"
                 self.difficulty = "hard"

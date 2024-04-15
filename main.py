@@ -96,6 +96,7 @@ class Othello:
         self.screen = pygame.display.set_mode((820, 640))
         pygame.display.set_caption("Othello")
   
+        self.file = None
         self.showMenu = True
         self.time = 0
 
@@ -120,7 +121,7 @@ class Othello:
         
         self.RUN = True
         self.menuFont = pygame.font.SysFont('Arial', 42, True, False)
-        self.menuScreen = MenuScreen(self.screen, self.menuFont)
+        self.menuScreen = MenuScreen(self.screen, self.menuFont, self)
         
         self.is_pvp = False
         self.network = None
@@ -139,6 +140,10 @@ class Othello:
 
             if self.menuScreen.menuType =="hard" and self.AlphaZeroPlayer == None:
                 self.AlphaZeroPlayer = AlphaZeroPlayer()
+                self.file = open("save_grid.txt", mode = 'w+',encoding = 'utf-8')
+                self.file.write(f'{self.menuScreen.menuType}\n')
+                self.file.write(str(self.grid.gridLogic))
+                self.file.close()
             
             if self.menuScreen.menuType == "chooseRoom" and self.is_pvp == False:
                 self.is_pvp = True
@@ -182,7 +187,6 @@ class Othello:
                                 
                                 self.clicked_y = y
                                 self.clicked_x = x
-
                     if self.gameOver:
                         x, y = pygame.mouse.get_pos()
                         if x >= 320 and x <= 480 and y >= 400 and y <= 480:
@@ -221,9 +225,9 @@ class Othello:
                     if not self.grid.findAvailMoves(self.grid.gridLogic, self.currentPlayerTurn):
                         self.gameOver = True
                         return
-                    if self.menuScreen.difficulty =="easy":
+                    if self.menuScreen.difficulty =="easy" or self.menuScreen.difficulty =="easy\n":
                         cell, score = self.computerPlayer.computerHard(self.grid.gridLogic, 5, -64, 64, self.currentPlayerTurn)
-                    elif self.menuScreen.difficulty =="hard" :
+                    elif self.menuScreen.difficulty =="hard" or self.menuScreen.difficulty =="hard\n":
                         # cell, score = self.computerPlayer.computerHard(self.grid.gridLogic, 5, -64, 64, -1)
                         # print('Dumb Move: ', cell)
                         cell = self.AlphaZeroPlayer.play(np.array(self.grid.gridLogic), self.currentPlayerTurn, 0)
@@ -235,6 +239,12 @@ class Othello:
                         self.grid.animateTransitions(tile, self.currentPlayerTurn)
                         self.grid.gridLogic[tile[0]][tile[1]] *= -1
                     self.currentPlayerTurn *= -1
+                    if not self.file:
+                        self.file = open("save_grid.txt", mode = 'w+',encoding = 'utf-8')
+                        self.file.write(f'{self.menuScreen.menuType}\n')
+                        self.file.write(str(self.grid.gridLogic))
+                        self.file.close()
+                        self.file = None
 
         self.grid.player1Score = self.grid.calculatePlayerScore(self.player1)
         self.grid.player2Score = self.grid.calculatePlayerScore(self.player2)
@@ -432,6 +442,13 @@ class Grid:
         tokenImage = self.whitetoken if curplayer == 1 else self.blacktoken
         self.tokens[(y, x)] = Token(curplayer, y, x, tokenImage, self.GAME)
         grid[y][x] = self.tokens[(y, x)].player
+        
+    def insertTokenForContinue(self, grid, cellValue, y, x):
+        tokenImage = self.whitetoken
+        if cellValue == -1:
+            tokenImage = self.blacktoken
+        self.tokens[(y, x)] = Token(cellValue, y, x, tokenImage, self.GAME)
+        grid[y][x] = self.tokens[(y, x)].player
 
     def animateTransitions(self, cell, player):
         if player == 1:
@@ -483,7 +500,6 @@ class Grid:
             
         window.blit(self.drawScore('White', self.player1Score), (660, 190))
         window.blit(self.drawScore('Black', self.player2Score), (660, 230))
-
         for token in self.tokens.values():
             token.draw(window)
 
