@@ -144,6 +144,7 @@ class Othello:
                 self.file.write(f'{self.menuScreen.menuType}\n')
                 self.file.write(str(self.grid.gridLogic))
                 self.file.close()
+                self.file = None
             
             if self.menuScreen.menuType == "chooseRoom" and self.is_pvp == False:
                 self.is_pvp = True
