@@ -283,6 +283,7 @@ class MenuScreen:
                 self.othelloObject.file.write(f'easy\n')
                 self.othelloObject.file.write(str(self.othelloObject.grid.gridLogic))
                 self.othelloObject.file.close()
+                self.othelloObject.file = None
             if drawDifficultReturn == "Hard":
                 self.menuType = "hard"
                 self.difficulty = "hard"
